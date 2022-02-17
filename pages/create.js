@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import baseUrl from "../Helpers/baseUrl";
 import Router from "next/router";
+import { parseCookies } from "nookies";
 
 const Create = () => {
   const [name, setName] = useState("");
@@ -41,7 +42,7 @@ const Create = () => {
     data.append("upload_preset", "mystore");
     data.append("cloud_name", "kodeeo");
     const res = await fetch(
-      "	https://api.cloudinary.com/v1_1/kodeeo/image/upload",
+      "https://api.cloudinary.com/v1_1/kodeeo/image/upload",
       {
         method: "POST",
         body: data,
@@ -106,5 +107,21 @@ const Create = () => {
     </form>
   );
 };
+
+export async function getServerSideProps(ctx) {
+  
+  const cookie = parseCookies(ctx);
+  const user = cookie.user ? JSON.parse(JSON.stringify(cookie.user)) : "";
+
+  if (user.role != 'admin') {
+    const { res } = ctx;
+    res.writeHead(302, { Location: "/" });
+    res.end();
+  }
+
+  return {
+    props: {},
+  };
+}
 
 export default Create;
